@@ -1,13 +1,54 @@
 name: Claude Code Agent
-description: General-purpose Claude Code workspace
+description: >-
+  General-purpose Claude Code workspace. Supports two auth paths:
+  (1) Claude Code subscription via OAuth token (CLAUDE_CODE_OAUTH_TOKEN,
+  obtained from `claude login`), or (2) Anthropic API key
+  (ANTHROPIC_API_KEY, pay-as-you-go via console.anthropic.com). The
+  `claude` CLI picks whichever is set; OAuth takes precedence when both
+  are present.
 version: 1.0.0
 tier: 2
 
 runtime: claude-code
 runtime_config:
   model: sonnet
+
+  # Canvas surfaces this list as a Model dropdown and auto-populates
+  # Required Env Vars based on the selected entry. OAuth and API-key
+  # variants of each model appear as separate entries so users pick
+  # the auth path matching the key they have — the claude CLI accepts
+  # either and the model id is identical across both.
+  models:
+    # --- OAuth (Claude Code subscription) — set CLAUDE_CODE_OAUTH_TOKEN ---
+    - id: sonnet
+      name: Claude Sonnet (OAuth / Claude Code subscription)
+      required_env: [CLAUDE_CODE_OAUTH_TOKEN]
+    - id: opus
+      name: Claude Opus (OAuth / Claude Code subscription)
+      required_env: [CLAUDE_CODE_OAUTH_TOKEN]
+    - id: haiku
+      name: Claude Haiku (OAuth / Claude Code subscription)
+      required_env: [CLAUDE_CODE_OAUTH_TOKEN]
+
+    # --- Direct Anthropic API — set ANTHROPIC_API_KEY ---
+    # Explicit versioned ids so the API call lands on a specific snapshot
+    # (OAuth aliases above resolve to the latest each model family).
+    - id: claude-sonnet-4-6
+      name: Claude Sonnet 4.6 (API key / Anthropic Console)
+      required_env: [ANTHROPIC_API_KEY]
+    - id: claude-opus-4-7
+      name: Claude Opus 4.7 (API key / Anthropic Console)
+      required_env: [ANTHROPIC_API_KEY]
+    - id: claude-haiku-4-5
+      name: Claude Haiku 4.5 (API key / Anthropic Console)
+      required_env: [ANTHROPIC_API_KEY]
+
+  # Default required_env — per-model entries above override this once a
+  # model is picked. Keep CLAUDE_CODE_OAUTH_TOKEN as the default so
+  # existing workspaces (which all use OAuth) keep working unchanged.
   required_env:
     - CLAUDE_CODE_OAUTH_TOKEN
+
   timeout: 0
 
 template_schema_version: 1
